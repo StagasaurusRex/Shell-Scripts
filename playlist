@@ -1,0 +1,11 @@
+#!/bin/bash
+
+path=.
+tempfile=./tempfile
+playlist=./playlist.m3u
+
+find $path -iregex "[^\.]*.avi" -or -iname "[^\.]*.mp4" -or -iname "[^\.]*.wmv" -or -iname "[^\.]*.mov" -or -iname "[^\.]*.webm" -or -iname "[^\.]*.mpg" -or -iname "[^\.]*.flv"> $tempfile 
+
+gshuf $tempfile > $playlist
+
+rm $tempfile
