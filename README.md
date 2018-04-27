@@ -1,6 +1,6 @@
-# My bash scripts
+# my bash scripts
 
 ## playlist
-No options currently.
+Generates a playlist(.m3u) of all video files found recursively in the current directory
 
-Generates a shuffled playlist(.m3u) of all video files found recursively in the current directory
+-s) Shuffle playlist
