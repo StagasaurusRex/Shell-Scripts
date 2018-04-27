@@ -1,11 +1,24 @@
 #!/bin/bash
-
-path=.
-tempfile=./tempfile
+shuffle=false
+dir=.
 playlist=./playlist.m3u
+tempfile=./tempfile
 
-find $path -iregex "[^\.]*.avi" -or -iname "[^\.]*.mp4" -or -iname "[^\.]*.wmv" -or -iname "[^\.]*.mov" -or -iname "[^\.]*.webm" -or -iname "[^\.]*.mpg" -or -iname "[^\.]*.flv"> $tempfile 
+while getopts 'sf:n:' flag; do
+  case "${flag}" in
+    s) shuffle=true ;;
+    *) error "Unexpected option ${flag}" ;;
+  esac
+done
 
-gshuf $tempfile > $playlist
+find $dir -iregex "[^\.]*.avi" -or -iname "[^\.]*.mkv" -or -iname "[^\.]*.mp4" -or -iname "[^\.]*.wmv" -or -iname "[^\.]*.mov" -or -iname "[^\.]*.webm" -or -iname "[^\.]*.mpg" -or -iname "[^\.]*.flv"> $tempfile 
 
-rm $tempfile
+if  [ "$shuffle" = true ] ;
+then
+	gshuf $tempfile > $playlist
+        rm $tempfile
+else
+	mv $tempfile $playlist
+fi
+
+ 
