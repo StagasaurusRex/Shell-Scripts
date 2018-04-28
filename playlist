@@ -1,24 +1,64 @@
 #!/bin/bash
+
 shuffle=false
 dir=.
-playlist=./playlist.m3u
-tempfile=./tempfile
+output=./_playlist.m3u
+tempfile=./tempfile.temp
+mode=video
+dirlog=./dir.temp
 
-while getopts 'sf:n:' flag; do
+while getopts 'sid:o:' flag; do
   case "${flag}" in
     s) shuffle=true ;;
+    i) mode=image 
+       output=./_images ;;
+    d) dir=${OPTARG} ;;
+    o) output=${OPTARG} ;;
     *) error "Unexpected option ${flag}" ;;
   esac
 done
 
-find $dir -iregex "[^\.]*.avi" -or -iname "[^\.]*.mkv" -or -iname "[^\.]*.mp4" -or -iname "[^\.]*.wmv" -or -iname "[^\.]*.mov" -or -iname "[^\.]*.webm" -or -iname "[^\.]*.mpg" -or -iname "[^\.]*.flv"> $tempfile 
 
-if  [ "$shuffle" = true ] ;
-then
-	gshuf $tempfile > $playlist
-        rm $tempfile
-else
-	mv $tempfile $playlist
-fi
-
- 
+case "$mode" in
+  video)
+    find -E "$dir" -iregex ".*/[^.]*\.(avi|mp4|mkv|wmv|mov|mpg|webm|flv|3gp)" > "$tempfile"
+    if  [ "$shuffle" = true ] ;
+    then
+        gshuf "$tempfile" > "$output"
+        rm "$tempfile"
+    else
+        mv "$tempfile" "$output"
+    fi
+;;
+  image)
+    pattern=".*/[^.]*\.(jpg|jpeg|png|gif|bmp|tiff|tif)"
+    find -E "$dir" -iregex ""$pattern"" > "$tempfile"
+    if [ "$shuffle" = true ] ;
+    then
+      echo "Getting List of directories, this may take a while..."
+      : > "$dirlog"
+      while read -r LINE; do
+        dirname "$LINE" >> "$dirlog" 
+      done < "$tempfile"
+      echo "Done"
+      echo "Getting unique directories..."
+      awk '!seen[$0]++' "$dirlog" > "$tempfile"
+      echo "Done"
+      echo "Shuffling directories..."
+      gshuf "$tempfile" > "$dirlog"
+      echo "Done"
+      echo "Getting files from directories"
+      : > "$output" 
+      while read -r LINE; do
+        find -E "$LINE" -iregex ""$pattern"" >> "$output" 
+      done < "$dirlog" 
+      echo "Done"
+      echo "Deleting temp files..."
+      rm "$dirlog" 
+      rm "$tempfile"
+      echo "Done" 
+    else
+      mv "$tempfile" "$output"
+    fi    
+;;
+esac
