@@ -21,31 +21,23 @@ done
 
 case "$mode" in
   video)
-    find -E "$dir" -iregex ".*/[^.]*\.(avi|mp4|mkv|wmv|mov|mpg|webm|flv|3gp)" > "$tempfile"
-    if  [ "$shuffle" = true ] ;
-    then
-        gshuf "$tempfile" > "$output"
-        rm "$tempfile"
-    else
-        mv "$tempfile" "$output"
-    fi
-;;
+    find -E "$dir" -iregex ".*/[^.]*\.(avi|mp4|mkv|wmv|mov|mpg|webm|flv|3gp)" | ( [[ ! "$shuffle" = true ]] && cat || gshuf ) >  "$output" ;;
   image)
     pattern=".*/[^.]*\.(jpg|jpeg|png|gif|bmp|tiff|tif)"
-    find -E "$dir" -iregex ""$pattern"" > "$tempfile"
+    find -E "$dir" -iregex ""$pattern"" > temp
     if [ "$shuffle" = true ] ;
     then
       echo "Getting List of directories, this may take a while..."
       : > "$dirlog"
       while read -r LINE; do
         dirname "$LINE" >> "$dirlog" 
-      done < "$tempfile"
+      done < temp
       echo "Done"
       echo "Getting unique directories..."
-      awk '!seen[$0]++' "$dirlog" > "$tempfile"
+      awk '!seen[$0]++' "$dirlog" > temp
       echo "Done"
       echo "Shuffling directories..."
-      gshuf "$tempfile" > "$dirlog"
+      gshuf temp > "$dirlog"
       echo "Done"
       echo "Getting files from directories"
       : > "$output" 
@@ -55,10 +47,10 @@ case "$mode" in
       echo "Done"
       echo "Deleting temp files..."
       rm "$dirlog" 
-      rm "$tempfile"
+      rm temp
       echo "Done" 
     else
-      mv "$tempfile" "$output"
+      mv temp "$output"
     fi    
 ;;
 esac
