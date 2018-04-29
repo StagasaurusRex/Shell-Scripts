@@ -20,6 +20,6 @@ case "$mode" in
     find -E "$dir" -iregex ".*/[^.]*\.(avi|mp4|mkv|wmv|mov|mpg|webm|flv|3gp)" | ( [[ ! "$shuffle" = true ]] && cat || gshuf ) >  "$output" ;;
   image)
     pattern=".*/[^.]*\.(jpg|jpeg|png|gif|bmp|tiff|tif)"
-    find "$dir" -type d -print0 | ([[ "$shuffle" = false ]] && cat || gshuf -z) | xargs -0 -I{} find -E '{}' -iregex ""$pattern""  > "$output" 
+    find "$dir" -type d -print0 | ([[ "$shuffle" = false ]] && cat || gshuf -z) | xargs -0 -I{} find -E '{}' -maxdepth 1 -iregex ""$pattern""  > "$output" 
 ;;
 esac
