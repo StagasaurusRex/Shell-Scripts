@@ -1,12 +1,9 @@
 #!/bin/bash
 
-shuffle=false
 dir=.
 output=./_playlist.m3u
-tempfile=./tempfile.temp
 mode=video
-dirlog=./dir.temp
-
+shuffle=false
 while getopts 'sid:o:' flag; do
   case "${flag}" in
     s) shuffle=true ;;
@@ -18,39 +15,11 @@ while getopts 'sid:o:' flag; do
   esac
 done
 
-
 case "$mode" in
   video)
     find -E "$dir" -iregex ".*/[^.]*\.(avi|mp4|mkv|wmv|mov|mpg|webm|flv|3gp)" | ( [[ ! "$shuffle" = true ]] && cat || gshuf ) >  "$output" ;;
   image)
     pattern=".*/[^.]*\.(jpg|jpeg|png|gif|bmp|tiff|tif)"
-    find -E "$dir" -iregex ""$pattern"" > temp
-    if [ "$shuffle" = true ] ;
-    then
-      echo "Getting List of directories, this may take a while..."
-      : > "$dirlog"
-      while read -r LINE; do
-        dirname "$LINE" >> "$dirlog" 
-      done < temp
-      echo "Done"
-      echo "Getting unique directories..."
-      awk '!seen[$0]++' "$dirlog" > temp
-      echo "Done"
-      echo "Shuffling directories..."
-      gshuf temp > "$dirlog"
-      echo "Done"
-      echo "Getting files from directories"
-      : > "$output" 
-      while read -r LINE; do
-        find -E "$LINE" -iregex ""$pattern"" >> "$output" 
-      done < "$dirlog" 
-      echo "Done"
-      echo "Deleting temp files..."
-      rm "$dirlog" 
-      rm temp
-      echo "Done" 
-    else
-      mv temp "$output"
-    fi    
+    find "$dir" -type d | ([[ "$shuffle" = false ]] && cat || gshuf) | xargs  -I{} find -E '{}' -iregex ""$pattern""  > "$output" 
 ;;
 esac
