@@ -1,0 +1,2 @@
+git config --get remote.origin.url | grep -Eo "[^/:]+\/[^./]+(?:\.git)" | xargs -I {} open "https://github.com/{}"
+
