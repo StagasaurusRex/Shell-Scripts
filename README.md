@@ -14,3 +14,5 @@ Generates a playlist of all video or image files found recursively in a director
 ## ogr
 
 Open the github repo page for the current directories git repo
+
+-b) Open repo page for current branch
