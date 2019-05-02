@@ -1,2 +1,7 @@
-git config --get remote.origin.url | grep -Eo "[^/:]+\/[^./]+(?:\.git)" | xargs -I {} open "https://github.com/{}"
 
+while getopts 'b' flag; do
+  git config --get remote.origin.url | grep -Eo '[^/:]+\/[^./]+\.git' | sed 's/.git//g' | xargs -I {} open "https://github.com/{}/tree/$(git branch | grep \* | sed 's/*//g' | sed 's/ //g')"
+exit
+done
+
+git config --get remote.origin.url | grep -Eo "[^/:]+\/[^./]+(?:\.git)" | xargs -I {} open "https://github.com/{}"
