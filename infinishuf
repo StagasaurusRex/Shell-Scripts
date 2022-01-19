@@ -1,0 +1,13 @@
+#!/bin/bash
+
+
+while true;
+do
+
+for i in {1..2}
+do
+shuf -n 1 _images.m3u | xargs -I{} /bin/bash -c "echo {}; open -a \"qview\" \"{}\"";
+done;
+	read -n 1 -s -r -p "Press enter to continue`echo $'\n '`";
+
+done;
