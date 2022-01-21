@@ -34,7 +34,7 @@ while true; do
 	done;
 	n=$initialCount;
 	printf "\n"
-	read -n 1 -s -r -p "Press any key to continue. Press a number to select that many photos" key;
+	read -n 1 -s -r -p "Press any key to continue. Press a number to open that many photos" key;
 	printf "\n\n"
 	if [[ $key =~ $re ]] ; then
 		n=$key;
