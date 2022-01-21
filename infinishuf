@@ -3,35 +3,39 @@
 re='^[0-9]+$'
 initialCount=1
 n=1
-file="_images"
-madeFile=false;
-
-function cleanup {
-	if $madeFile; then rm "$file"; fi
-}
-
-trap cleanup EXIT
+dir=.
 
 while getopts 'n:i:' flag; do
 	case "${flag}" in
-	i) file=$OPTARG ;;
+	i) dir=$OPTARG ;;
     n) 
 		if [[ $OPTARG =~ $re ]] ; then
-		initialCount=$OPTARG;
-		n=$initialCount;
-	fi ;;
+			initialCount=$OPTARG;
+			n=$initialCount;
+		fi ;;
     *) error "Unexpected option ${flag}r" ;;
   esac
 done
 
-[[ -f "$file" ]] || playlist -i -o "$file" && madeFile=true
+IFS=$'\n'
+
+fileArray=( $(find "$dir" -type d -print0 | ([[ "$shuffle" = false ]] && cat || gshuf -z) | xargs -0 -I{} find -E '{}' -maxdepth 1 -iregex ".*/[^.]*\.(jpg|jpeg|png|gif|bmp|tiff|tif)") )
+
+unset IFS;
+
+printf "${#fileArray[@]} images found\nOpening "$n" images\n\n";
 
 while true; do
 	for i in $(eval echo {1..$n}); do
-		shuf -n 1 "$file" | xargs -I{} /bin/bash -c "echo {}; open '{}'";
+		selected="${fileArray[RANDOM%${#fileArray[@]}]}"
+		path=${selected##"$dir"}
+		echo ${path#"/"}
+		open "$selected"
 	done;
 	n=$initialCount;
-	read -n 1 -s -r -p "Press any key to continue. Press a number to select that many photos`echo $'\n '`" key;
+	printf "\n"
+	read -n 1 -s -r -p "Press any key to continue. Press a number to select that many photos" key;
+	printf "\n\n"
 	if [[ $key =~ $re ]] ; then
 		n=$key;
 	fi
