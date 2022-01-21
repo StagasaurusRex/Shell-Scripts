@@ -1,13 +1,38 @@
 #!/bin/bash
 
+re='^[0-9]+$'
+initialCount=1
+n=1
+file="_images"
+madeFile=false;
 
-while true;
-do
+function cleanup {
+	if $madeFile; then rm "$file"; fi
+}
 
-for i in {1..2}
-do
-shuf -n 1 _images.m3u | xargs -I{} /bin/bash -c "echo {}; open -a \"qview\" \"{}\"";
-done;
-	read -n 1 -s -r -p "Press enter to continue`echo $'\n '`";
+trap cleanup EXIT
 
+while getopts 'n:i:' flag; do
+	case "${flag}" in
+	i) file=$OPTARG ;;
+    n) 
+		if [[ $OPTARG =~ $re ]] ; then
+		initialCount=$OPTARG;
+		n=$initialCount;
+	fi ;;
+    *) error "Unexpected option ${flag}r" ;;
+  esac
+done
+
+[[ -f "$file" ]] || playlist -i -o "$file" && madeFile=true
+
+while true; do
+	for i in $(eval echo {1..$n}); do
+		shuf -n 1 "$file" | xargs -I{} /bin/bash -c "echo {}; open '{}'";
+	done;
+	n=$initialCount;
+	read -n 1 -s -r -p "Press any key to continue. Press a number to select that many photos`echo $'\n '`" key;
+	if [[ $key =~ $re ]] ; then
+		n=$key;
+	fi
 done;
