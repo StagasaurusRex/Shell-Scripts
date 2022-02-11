@@ -4,8 +4,9 @@ re='^[0-9]+$'
 initialCount=1
 n=1
 dir=.
+shuffle=false
 
-while getopts 'n:i:' flag; do
+while getopts 'n:i:s' flag; do
 	case "${flag}" in
 	i) dir=$OPTARG ;;
     n) 
@@ -13,13 +14,30 @@ while getopts 'n:i:' flag; do
 			initialCount=$OPTARG;
 			n=$initialCount;
 		fi ;;
+    s) shuffle=true ;;
     *) error "Unexpected option ${flag}r" ;;
   esac
 done
 
 IFS=$'\n'
 
-fileArray=( $(find "$dir" -type d -print0 | ([[ "$shuffle" = false ]] && cat || gshuf -z) | xargs -0 -I{} find -E '{}' -maxdepth 1 -iregex ".*/[^.]*\.(jpg|jpeg|png|gif|bmp|tiff|tif)") )
+fileArray=( )
+
+if $shuffle ; then
+  fileArray=( $(find "$dir" -type d -print0 | xargs -0 -I{} find -E '{}' -maxdepth 1 -iregex ".*/[^.]*\.(jpg|jpeg|png|gif|bmp|tiff|tif)") )
+
+else
+  pattern="[^.]*\.(jpg|jpeg|png|gif|bmp|tiff|tif)"
+
+  for directory in $(find "$dir" -type d); do
+  	for file in "$directory"/*; do
+  	  if [[ ${file##*/} =~ $pattern ]] ; then
+  	    fileArray+=( "$file" )
+  	    break 1;
+      fi
+  	done;
+  done
+fi;
 
 unset IFS;
 
